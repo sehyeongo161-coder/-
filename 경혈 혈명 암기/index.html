@@ -1,0 +1,103 @@
+<!-- ... existing code ... -->
+                            <div class="flex justify-center gap-4 mt-4">
+                                <button id="hintBtn" class="text-sm text-indigo-500 hover:text-indigo-700 underline underline-offset-2">
+                                    힌트 보기 (초성)
+                                </button>
+                                <button id="showAnswerBtn" class="text-sm text-rose-500 hover:text-rose-700 underline underline-offset-2">
+<!-- ... existing code ... -->
+        // 힌트 & 정답 보기
+        hintBtn.addEventListener('click', () => isHintVisible ? hideHint() : showHint());
+        showAnswerBtn.addEventListener('click', () => isAnswerVisible ? hideAnswer() : showAnswer());
+
+        function showHint() {
+            const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
+            hintText.innerHTML = getChosung(targetPoint.name);
+            hintText.classList.remove('hidden');
+            hintBtn.textContent = '힌트 닫기';
+            isHintVisible = true;
+        }
+
+        function hideHint() {
+            hintText.classList.add('hidden');
+            hintText.textContent = '';
+            hintBtn.textContent = '힌트 보기 (초성)';
+            isHintVisible = false;
+        }
+
+        function showAnswer() {
+            const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
+            answerText.innerHTML = `${targetPoint.name}<span class="font-normal text-rose-700 ml-1">(${targetPoint.hanja})</span>`;
+            answerArea.classList.remove('hidden');
+            showAnswerBtn.textContent = '정답 숨기기';
+            isAnswerVisible = true;
+        }
+<!-- ... existing code ... -->
+                // 맞춘 목록 업데이트
+                guessedList.innerHTML = '';
+                if (currentIndex === 0 && !hasWrongAtCurrent) {
+                    guessedList.innerHTML = '<span class="text-slate-400 text-sm italic">아직 맞춘 혈자리가 없습니다.</span>';
+                } else {
+                    for (let i = 0; i < currentIndex; i++) {
+                        const p = currentPoints[i];
+                        const tag = document.createElement('span');
+                        if (wrongIndices.has(i)) {
+                            tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-800 border border-rose-200';
+                            tag.innerHTML = `⚠️ <span class="text-rose-400 ml-1 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`;
+                        } else {
+                            tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200';
+                            tag.innerHTML = `<span class="text-indigo-400 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`;
+                        }
+                        guessedList.appendChild(tag);
+                    }
+<!-- ... existing code ... -->
+                // [복습 모드] UI 업데이트
+                if (reviewQueue.length === 0) return;
+                const targetIdx = reviewQueue[currentReviewIndex];
+                
+                const prevHtml = targetIdx > 0 
+                    ? `<span class="block">${currentPoints[targetIdx - 1].name}(${currentPoints[targetIdx - 1].hanja})</span>`
+                    : '<span class="text-sm">시작</span>';
+                    
+                const nextHtml = targetIdx < total - 1 
+                    ? `<span class="block">${currentPoints[targetIdx + 1].name}(${currentPoints[targetIdx + 1].hanja})</span>`
+                    : '<span class="text-sm">끝</span>';
+
+                questionLabel.innerHTML = `
+<!-- ... existing code ... -->
+            currentPoints.forEach((point, index) => {
+                const isGuessed = !isReviewMode && (index < currentIndex);
+                const isCurrent = !isReviewMode ? (index === currentIndex) : (reviewQueue.length > 0 && index === reviewQueue[currentReviewIndex]);
+
+                const item = document.createElement('div');
+                let baseClasses = "flex justify-between items-center px-3 py-2 rounded-lg border transition-all";
+
+                if (isGuessed) {
+                    item.className = `${baseClasses} bg-indigo-50 border-indigo-100 text-indigo-800 opacity-80`;
+                    item.innerHTML = `<span class="font-medium opacity-60 w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="font-bold flex-1 text-center text-sm">${point.name} <span class="font-normal text-indigo-500">(${point.hanja})</span></span> 
+                                      <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                } else if (isCurrent) {
+                    item.className = `${baseClasses} bg-rose-50 border-rose-300 text-rose-900 ring-2 ring-rose-200 shadow-sm font-bold scale-[1.02] transform my-1`;
+                    item.innerHTML = `<span class="w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="flex-1 text-center text-[15px]">${point.name} <span class="font-normal text-rose-600">(${point.hanja})</span></span>
+                                      <span class="text-[10px] px-1.5 py-0.5 bg-rose-200 text-rose-800 rounded animate-pulse">현재</span>`;
+                    currentElementToScroll = item;
+                } else {
+                    item.className = `${baseClasses} bg-slate-50 border-slate-200 text-slate-500`;
+                    item.innerHTML = `<span class="opacity-70 w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="flex-1 text-center text-sm">${point.name} <span class="font-normal opacity-70">(${point.hanja})</span></span>
+                                      <span class="w-4"></span>`;
+                }
+                referenceListContainer.appendChild(item);
+            });
+<!-- ... existing code ... -->
+                wrongListEl.innerHTML = '';
+                wrongIndices.forEach(idx => {
+                    const p = currentPoints[idx];
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-white text-rose-800 border-2 border-rose-200 shadow-sm';
+                    tag.innerHTML = `⚠️ <span class="text-rose-400 mr-2 text-xs">${meridiansData[currentMeridianId].prefix}${idx+1}</span> ${p.name} <span class="text-rose-500 ml-1">(${p.hanja})</span>`;
+                    wrongListEl.appendChild(tag);
+                });
+            } else {
+<!-- ... existing code ... -->
