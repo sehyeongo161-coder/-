@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경혈학 유주노선 & 한자 암기 도우미</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .point-tag {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800 break-keep">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 pt-8 sm:pt-12">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-indigo-900 mb-2">경혈학 유주노선 & 한자 암기 프로그램</h1>
+            <p class="text-slate-500">순서대로 혈자리를 맞추며 완벽하게 외워보세요. (한자 자동 표시)</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                        <div class="w-full sm:w-auto">
+                            <label for="meridianSelect" class="block text-sm font-medium text-slate-700 mb-1">학습할 경맥 선택</label>
+                            <select id="meridianSelect" class="w-full sm:w-64 bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5">
+                                <option value="kidney">족소음신경 (27혈)</option>
+                                <option value="pericardium">수궐음심포경 (9혈)</option>
+                                <option value="tripleEnergizer">수소양삼초경 (23혈)</option>
+                                <option value="gallbladder">족소양담경 (44혈)</option>
+                                <option value="liver">족궐음간경 (14혈)</option>
+                            </select>
+                        </div>
+                        <button id="resetBtn" class="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 focus:ring-4 focus:outline-none focus:ring-slate-100 transition-colors">
+                            처음부터 다시
+                        </button>
+                    </div>
+
+                    <div class="mb-2 flex justify-between items-center text-sm font-medium text-indigo-700">
+                        <span id="progressText">0 / 27</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5 mb-6">
+                        <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div id="quizArea" class="text-center py-6 border-t border-slate-100">
+                        <h2 id="questionLabel" class="text-2xl font-bold text-slate-800 mb-4">
+                            1번 혈자리 (KI1)
+                        </h2>
+                        
+                        <div class="max-w-md mx-auto">
+                            <div class="relative">
+                                <input type="text" id="pointInput" autocomplete="off" placeholder="혈자리 이름 입력 (예: 용천)" 
+                                    class="block w-full p-4 text-center text-xl text-slate-900 border-2 border-slate-300 rounded-xl bg-slate-50 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                            </div>
+                            <div id="feedbackMsg" class="mt-3 text-sm font-medium h-5 text-red-500 hidden">
+                                틀렸습니다. 다시 생각해보세요!
+                            </div>
+                            
+                            <div class="flex justify-center gap-4 mt-4">
+                                <button id="hintBtn" class="text-sm text-indigo-500 hover:text-indigo-700 underline underline-offset-2">
+                                    힌트 보기 (초성)
+                                </button>
+                                <button id="showAnswerBtn" class="text-sm text-rose-500 hover:text-rose-700 underline underline-offset-2">
+                                    정답 보기
+                                </button>
+                            </div>
+                            
+                            <div id="hintText" class="mt-2 text-lg font-bold text-indigo-400 hidden"></div>
+                            
+                            <div id="answerArea" class="mt-4 p-4 bg-rose-50 border border-rose-200 rounded-lg hidden transition-all">
+                                <p class="text-sm text-rose-700 mb-3">정답: <span id="answerText" class="font-bold text-2xl text-rose-900 ml-1"></span></p>
+                                <div class="flex justify-center gap-2">
+                                    <button id="skipBtn" class="px-4 py-2 text-sm font-medium text-white bg-rose-500 rounded hover:bg-rose-600 focus:outline-none transition-colors">
+                                        모르겠음 (넘어가기)
+                                    </button>
+                                </div>
+                                <p class="mt-2 text-xs text-rose-500">오답 노트를 위해 직접 입력하거나 그냥 넘어갈 수 있습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="completionArea" class="text-center py-8 hidden">
+                        <div id="perfectMsg" class="hidden">
+                            <div class="text-5xl mb-4">🏆</div>
+                            <h2 class="text-2xl font-bold text-indigo-700 mb-2">완벽합니다!</h2>
+                            <p class="text-slate-600">이 경맥의 모든 혈자리를 완벽하게 암기하셨습니다.</p>
+                        </div>
+                        
+                        <div id="reviewSection" class="hidden">
+                            <div class="text-5xl mb-4">📝</div>
+                            <h2 class="text-2xl font-bold text-rose-700 mb-2">1차 암기 완료!</h2>
+                            <p class="text-slate-600 mb-4">하지만 틀리거나 넘긴 혈자리가 있습니다. 아래 오답들을 확인하세요.</p>
+                            
+                            <div id="wrongList" class="flex flex-wrap justify-center gap-2 mb-8 p-4 bg-rose-50 rounded-lg border border-rose-100">
+                                </div>
+                            
+                            <button id="startReviewBtn" class="px-8 py-3 text-lg font-bold text-white bg-rose-500 rounded-xl hover:bg-rose-600 shadow-md transform transition hover:-translate-y-1">
+                                다시 외우기 (오답 랜덤 복습)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        현재까지 맞춘 유주 노선
+                    </h3>
+                    <div id="guessedList" class="flex flex-wrap gap-2">
+                        </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-fit">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                        <svg class="w-5 h-5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                        <span id="referenceTitle" class="text-indigo-700 mx-1">족소음신경</span> 전체 목록
+                    </h3>
+                    <button id="toggleRefBtn" class="flex items-center text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors bg-white px-2 py-1 rounded border shadow-sm">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        목록 열기
+                    </button>
+                </div>
+                
+                <div class="relative p-2">
+                    <div id="refLockScreen" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-b-xl min-h-[400px]">
+                        <div class="text-5xl mb-4">🔒</div>
+                        <p class="font-bold text-lg text-slate-700">컨닝 방지 모드</p>
+                        <p class="text-sm text-slate-500 mt-2">우측 상단의 '목록 열기'를 눌러 확인하세요.</p>
+                    </div>
+                    
+                    <div id="referenceListContainer" class="flex flex-col gap-1 max-h-[600px] overflow-y-auto pr-1 hidden">
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 경맥 데이터 (한자 병기)
+        const meridiansData = {
+            kidney: {
+                name: "족소음신경(足少陰腎經)", prefix: "KI",
+                points: [
+                    {name: "용천", hanja: "湧泉"}, {name: "연곡", hanja: "然谷"}, {name: "태계", hanja: "太谿"},
+                    {name: "대종", hanja: "大鍾"}, {name: "수천", hanja: "水泉"}, {name: "조해", hanja: "照海"},
+                    {name: "복류", hanja: "復溜"}, {name: "교신", hanja: "交信"}, {name: "축빈", hanja: "築賓"},
+                    {name: "음곡", hanja: "陰谷"}, {name: "횡골", hanja: "橫骨"}, {name: "대혁", hanja: "大赫"},
+                    {name: "기혈", hanja: "氣穴"}, {name: "사만", hanja: "四滿"}, {name: "중주", hanja: "中注"},
+                    {name: "황수", hanja: "肓兪"}, {name: "상곡", hanja: "商曲"}, {name: "석관", hanja: "石關"},
+                    {name: "음도", hanja: "陰都"}, {name: "복통곡", hanja: "腹通谷"}, {name: "유문", hanja: "幽門"},
+                    {name: "보랑", hanja: "步廊"}, {name: "신봉", hanja: "神封"}, {name: "영허", hanja: "靈墟"},
+                    {name: "신장", hanja: "神藏"}, {name: "옥중", hanja: "彧中"}, {name: "수부", hanja: "兪府"}
+                ]
+            },
+            pericardium: {
+                name: "수궐음심포경(手厥陰心包經)", prefix: "PC",
+                points: [
+                    {name: "천지", hanja: "天池"}, {name: "천천", hanja: "天泉"}, {name: "곡택", hanja: "曲澤"},
+                    {name: "극문", hanja: "郄門"}, {name: "간사", hanja: "間使"}, {name: "내관", hanja: "內關"},
+                    {name: "대릉", hanja: "大陵"}, {name: "노궁", hanja: "勞宮"}, {name: "중충", hanja: "中衝"}
+                ]
+            },
+            tripleEnergizer: {
+                name: "수소양삼초경(手少陽三焦經)", prefix: "TE",
+                points: [
+                    {name: "관충", hanja: "關衝"}, {name: "액문", hanja: "液門"}, {name: "중저", hanja: "中渚"},
+                    {name: "양지", hanja: "陽池"}, {name: "외관", hanja: "外關"}, {name: "지구", hanja: "支溝"},
+                    {name: "회종", hanja: "會宗"}, {name: "삼양락", hanja: "三陽絡"}, {name: "사독", hanja: "四瀆"},
+                    {name: "천정", hanja: "天井"}, {name: "청냉연", hanja: "淸冷淵"}, {name: "소락", hanja: "消濼"},
+                    {name: "노회", hanja: "臑會"}, {name: "견료", hanja: "肩髎"}, {name: "천료", hanja: "天髎"},
+                    {name: "천유", hanja: "天牖"}, {name: "예풍", hanja: "翳風"}, {name: "계맥", hanja: "瘈脈"},
+                    {name: "노식", hanja: "顱息"}, {name: "각손", hanja: "角孫"}, {name: "이문", hanja: "耳門"},
+                    {name: "화료", hanja: "和髎"}, {name: "사죽공", hanja: "絲竹空"}
+                ]
+            },
+            gallbladder: {
+                name: "족소양담경(足少陽膽經)", prefix: "GB",
+                points: [
+                    {name: "동자료", hanja: "瞳子髎"}, {name: "청회", hanja: "聽會"}, {name: "상관", hanja: "上關"},
+                    {name: "함염", hanja: "頷厭"}, {name: "현로", hanja: "懸顱"}, {name: "현리", hanja: "懸釐"},
+                    {name: "곡빈", hanja: "曲鬢"}, {name: "솔곡", hanja: "率谷"}, {name: "천충", hanja: "天衝"},
+                    {name: "부백", hanja: "浮白"}, {name: "두규음", hanja: "頭竅陰"}, {name: "완골", hanja: "完骨"},
+                    {name: "본신", hanja: "本神"}, {name: "양백", hanja: "陽白"}, {name: "두임읍", hanja: "頭臨泣"},
+                    {name: "목창", hanja: "目窗"}, {name: "정영", hanja: "正營"}, {name: "승령", hanja: "承靈"},
+                    {name: "뇌공", hanja: "腦空"}, {name: "풍지", hanja: "風池"}, {name: "견정", hanja: "肩井"},
+                    {name: "연액", hanja: "淵腋"}, {name: "첩근", hanja: "輒筋"}, {name: "일월", hanja: "日月"},
+                    {name: "경문", hanja: "京門"}, {name: "대맥", hanja: "帶脈"}, {name: "오추", hanja: "五樞"},
+                    {name: "유도", hanja: "維道"}, {name: "거료", hanja: "居髎"}, {name: "환도", hanja: "環跳"},
+                    {name: "풍시", hanja: "風市"}, {name: "중독", hanja: "中瀆"}, {name: "슬양관", hanja: "膝陽關"},
+                    {name: "양릉천", hanja: "陽陵泉"}, {name: "양교", hanja: "陽交"}, {name: "외구", hanja: "外丘"},
+                    {name: "광명", hanja: "光明"}, {name: "양보", hanja: "陽輔"}, {name: "현종", hanja: "懸鍾"},
+                    {name: "구허", hanja: "丘墟"}, {name: "족임읍", hanja: "足臨泣"}, {name: "지오회", hanja: "地五會"},
+                    {name: "협계", hanja: "俠谿"}, {name: "족규음", hanja: "足竅陰"}
+                ]
+            },
+            liver: {
+                name: "족궐음간경(足厥陰肝經)", prefix: "LR",
+                points: [
+                    {name: "대돈", hanja: "大敦"}, {name: "행간", hanja: "行間"}, {name: "태충", hanja: "太衝"},
+                    {name: "중봉", hanja: "中封"}, {name: "여구", hanja: "蠡溝"}, {name: "중도", hanja: "中都"},
+                    {name: "슬관", hanja: "膝關"}, {name: "곡천", hanja: "曲泉"}, {name: "음포", hanja: "陰包"},
+                    {name: "족오리", hanja: "足五里"}, {name: "음렴", hanja: "陰廉"}, {name: "급맥", hanja: "急脈"},
+                    {name: "장문", hanja: "章門"}, {name: "기문", hanja: "期門"}
+                ]
+            }
+        };
+
+        // 이명(다른 이름) 처리 (입력은 한글로만 확인)
+        const aliases = {
+            "상관": ["객주인"],
+            "현종": ["절골"],
+            "복통곡": ["통곡"],
+            "복류": ["부류"],
+            "옥중": ["욱중"], 
+            "화료": ["이화료"], 
+            "슬양관": ["양관"], 
+            "두임읍": ["임읍"],
+            "족임읍": ["임읍"],
+            "두규음": ["규음"],
+            "족규음": ["규음"]
+        };
+
+        // 상태 변수
+        let currentMeridianId = 'kidney';
+        let currentPoints = [];
+        let currentIndex = 0;
+        let isHintVisible = false;
+        let isAnswerVisible = false;
+        let isReferenceVisible = false;
+
+        // 복습 모드 관련 변수
+        let isReviewMode = false;
+        let wrongIndices = new Set(); // 오답 기록
+        let reviewQueue = []; // 복습할 문제 인덱스 배열 (랜덤)
+        let currentReviewIndex = 0; 
+        let hasWrongAtCurrent = false; // 스포일러 방지용 (?? 표시)
+
+        // DOM 요소
+        const selectEl = document.getElementById('meridianSelect');
+        const inputEl = document.getElementById('pointInput');
+        const questionLabel = document.getElementById('questionLabel');
+        const feedbackMsg = document.getElementById('feedbackMsg');
+        const guessedList = document.getElementById('guessedList');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressPercent = document.getElementById('progressPercent');
+        const quizArea = document.getElementById('quizArea');
+        const completionArea = document.getElementById('completionArea');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        const hintBtn = document.getElementById('hintBtn');
+        const hintText = document.getElementById('hintText');
+        const showAnswerBtn = document.getElementById('showAnswerBtn');
+        const answerArea = document.getElementById('answerArea');
+        const answerText = document.getElementById('answerText');
+        const skipBtn = document.getElementById('skipBtn');
+        
+        const referenceTitle = document.getElementById('referenceTitle');
+        const referenceListContainer = document.getElementById('referenceListContainer');
+        const toggleRefBtn = document.getElementById('toggleRefBtn');
+        const refLockScreen = document.getElementById('refLockScreen');
+
+        // 초기화 (게임 시작)
+        function initGame() {
+            currentMeridianId = selectEl.value;
+            currentPoints = meridiansData[currentMeridianId].points;
+            currentIndex = 0;
+            
+            isReviewMode = false;
+            wrongIndices.clear();
+            hasWrongAtCurrent = false;
+            
+            quizArea.classList.remove('hidden');
+            completionArea.classList.add('hidden');
+            inputEl.value = '';
+            inputEl.disabled = false;
+            hideFeedback();
+            hideHint();
+            hideAnswer();
+            
+            updateUI();
+            setTimeout(() => inputEl.focus(), 50);
+        }
+
+        // 초성 추출기 (한글 이름만)
+        function getChosung(str) {
+            const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+            let result = "";
+            for(let i=0; i<str.length; i++) {
+                let code = str.charCodeAt(i) - 44032;
+                if(code > -1 && code < 11172) result += cho[Math.floor(code/588)];
+                else result += str.charAt(i);
+            }
+            return result;
+        }
+
+        // 힌트 & 정답 보기
+        hintBtn.addEventListener('click', () => isHintVisible ? hideHint() : showHint());
+        showAnswerBtn.addEventListener('click', () => isAnswerVisible ? hideAnswer() : showAnswer());
+
+        function showHint() {
+            const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
+            hintText.innerHTML = getChosung(targetPoint.name); // 한자 제거
+            hintText.classList.remove('hidden');
+            hintBtn.textContent = '힌트 닫기';
+            isHintVisible = true;
+        }
+
+        function hideHint() {
+            hintText.classList.add('hidden');
+            hintText.textContent = '';
+            hintBtn.textContent = '힌트 보기 (초성)'; // 텍스트 수정
+            isHintVisible = false;
+        }
+
+        function showAnswer() {
+            const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
+            answerText.innerHTML = `${targetPoint.name}<span class="font-normal text-rose-700 ml-1">(${targetPoint.hanja})</span>`; // 한자 크기 조정
+            answerArea.classList.remove('hidden');
+            showAnswerBtn.textContent = '정답 숨기기';
+            isAnswerVisible = true;
+        }
+
+        function hideAnswer() {
+            answerArea.classList.add('hidden');
+            showAnswerBtn.textContent = '정답 보기';
+            isAnswerVisible = false;
+        }
+
+        // 목록 보기/숨기기 토글
+        toggleRefBtn.addEventListener('click', () => {
+            isReferenceVisible = !isReferenceVisible;
+            if (isReferenceVisible) {
+                referenceListContainer.classList.remove('hidden');
+                refLockScreen.classList.add('hidden');
+                toggleRefBtn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg> 목록 닫기';
+                updateReferenceList(); // 스크롤 동기화를 위해 재호출
+            } else {
+                referenceListContainer.classList.add('hidden');
+                refLockScreen.classList.remove('hidden');
+                toggleRefBtn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> 목록 열기';
+            }
+        });
+
+        // 강제로 넘어가기 (스킵)
+        skipBtn.addEventListener('click', () => {
+            if (isReviewMode) {
+                handleReviewWrong("스킵했습니다. 다음 문제로 넘어갑니다.");
+            } else {
+                wrongIndices.add(currentIndex);
+                hasWrongAtCurrent = false;
+                currentIndex++;
+                nextQuestion();
+            }
+        });
+
+        function nextQuestion() {
+            inputEl.value = '';
+            hideFeedback();
+            hideHint();
+            hideAnswer();
+            updateUI();
+            if(!inputEl.disabled) inputEl.focus();
+        }
+
+        // 복습 모드에서 틀렸을 때 처리
+        function handleReviewWrong(msg) {
+            showFeedbackError(msg);
+            inputEl.disabled = true; // 잠시 입력 불가
+            setTimeout(() => {
+                inputEl.disabled = false;
+                currentReviewIndex = (currentReviewIndex + 1) % reviewQueue.length;
+                nextQuestion();
+            }, 1000); // 1초 후 강제 다음 문제
+        }
+
+        // UI 업데이트
+        function updateUI() {
+            const total = currentPoints.length;
+            const prefix = meridiansData[currentMeridianId].prefix;
+
+            if (!isReviewMode) {
+                // [일반 모드] 프로그래스 바 업데이트
+                const percent = total > 0 ? Math.round((currentIndex / total) * 100) : 0;
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${currentIndex} / ${total}`;
+                progressPercent.textContent = `${percent}%`;
+
+                if (currentIndex < total) {
+                    questionLabel.innerHTML = `<span class="text-indigo-600">${currentIndex + 1}번</span> 혈자리 <span class="text-slate-400 text-lg">(${prefix}${currentIndex + 1})</span>`;
+                } else {
+                    showCompletionScreen();
+                }
+
+                // 맞춘 목록 업데이트
+                guessedList.innerHTML = '';
+                if (currentIndex === 0 && !hasWrongAtCurrent) {
+                    guessedList.innerHTML = '<span class="text-slate-400 text-sm italic">아직 맞춘 혈자리가 없습니다.</span>';
+                } else {
+                    for (let i = 0; i < currentIndex; i++) {
+                        const p = currentPoints[i];
+                        const tag = document.createElement('span');
+                        if (wrongIndices.has(i)) {
+                            tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-800 border border-rose-200';
+                            tag.innerHTML = `⚠️ <span class="text-rose-400 ml-1 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`; // 한자 크기 확대
+                        } else {
+                            tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200';
+                            tag.innerHTML = `<span class="text-indigo-400 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`; // 한자 크기 확대
+                        }
+                        guessedList.appendChild(tag);
+                    }
+                    // 현재 진행중인데 틀린 기록이 있다면 스포일러 없는 ?? 태그 추가
+                    if (hasWrongAtCurrent) {
+                        const errTag = document.createElement('span');
+                        errTag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-red-100 text-red-800 border border-red-300 animate-pulse';
+                        errTag.innerHTML = `❌ <span class="text-red-500 ml-1 mr-1 text-xs">${currentIndex+1}</span> ?? <span class="text-[10px] text-red-400 ml-1">(오답)</span>`;
+                        guessedList.appendChild(errTag);
+                    }
+                }
+            } else {
+                // [복습 모드] UI 업데이트
+                if (reviewQueue.length === 0) return;
+                const targetIdx = reviewQueue[currentReviewIndex];
+                
+                const prevHtml = targetIdx > 0 
+                    ? `<span class="block">${currentPoints[targetIdx - 1].name}(${currentPoints[targetIdx - 1].hanja})</span>`
+                    : '<span class="text-sm">시작</span>';
+                    
+                const nextHtml = targetIdx < total - 1 
+                    ? `<span class="block">${currentPoints[targetIdx + 1].name}(${currentPoints[targetIdx + 1].hanja})</span>`
+                    : '<span class="text-sm">끝</span>';
+
+                questionLabel.innerHTML = `
+                    <div class="text-sm text-rose-500 mb-4 font-bold tracking-wide">[🔥 오답 복습 모드: 남은 혈자리 ${reviewQueue.length}개]</div>
+                    <div class="flex items-center justify-center gap-3 text-lg">
+                        <span class="text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded text-center leading-tight shadow-sm min-w-[60px]">${prevHtml}</span>
+                        <span class="text-rose-400 text-2xl font-bold">➔</span>
+                        <span class="text-3xl font-bold text-rose-600 border-b-4 border-rose-500 px-3 pb-1"> ? </span>
+                        <span class="text-rose-400 text-2xl font-bold">➔</span>
+                        <span class="text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded text-center leading-tight shadow-sm min-w-[60px]">${nextHtml}</span>
+                    </div>
+                    <div class="mt-4 text-slate-400 text-sm">(${prefix}${targetIdx + 1})</div>
+                `;
+                
+                guessedList.innerHTML = '<span class="text-slate-500 text-sm italic font-medium">오답 복습 중입니다. 앞뒤 혈자리의 흐름을 보고 빈칸을 유추해 보세요.</span>';
+            }
+
+            // 오른쪽 참조 목록 업데이트
+            updateReferenceList();
+        }
+
+        // 우측 전체 참조 목록 업데이트
+        function updateReferenceList() {
+            referenceTitle.textContent = meridiansData[currentMeridianId].name;
+            if (!isReferenceVisible) return; // 숨김 상태면 렌더링 생략 (성능 최적화)
+
+            referenceListContainer.innerHTML = '';
+            let currentElementToScroll = null;
+            const prefix = meridiansData[currentMeridianId].prefix;
+
+            currentPoints.forEach((point, index) => {
+                const isGuessed = !isReviewMode && (index < currentIndex);
+                const isCurrent = !isReviewMode ? (index === currentIndex) : (reviewQueue.length > 0 && index === reviewQueue[currentReviewIndex]);
+
+                const item = document.createElement('div');
+                let baseClasses = "flex justify-between items-center px-3 py-2 rounded-lg border transition-all";
+
+                if (isGuessed) {
+                    item.className = `${baseClasses} bg-indigo-50 border-indigo-100 text-indigo-800 opacity-80`;
+                    item.innerHTML = `<span class="font-medium opacity-60 w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="font-bold flex-1 text-center text-sm">${point.name} <span class="font-normal text-indigo-500">(${point.hanja})</span></span> 
+                                      <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                } else if (isCurrent) {
+                    item.className = `${baseClasses} bg-rose-50 border-rose-300 text-rose-900 ring-2 ring-rose-200 shadow-sm font-bold scale-[1.02] transform my-1`;
+                    item.innerHTML = `<span class="w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="flex-1 text-center text-[15px]">${point.name} <span class="font-normal text-rose-600">(${point.hanja})</span></span>
+                                      <span class="text-[10px] px-1.5 py-0.5 bg-rose-200 text-rose-800 rounded animate-pulse">현재</span>`;
+                    currentElementToScroll = item;
+                } else {
+                    item.className = `${baseClasses} bg-slate-50 border-slate-200 text-slate-500`;
+                    item.innerHTML = `<span class="opacity-70 w-8 text-xs">${prefix}${index + 1}</span> 
+                                      <span class="flex-1 text-center text-sm">${point.name} <span class="font-normal opacity-70">(${point.hanja})</span></span>
+                                      <span class="w-4"></span>`;
+                }
+                referenceListContainer.appendChild(item);
+            });
+
+            if (currentElementToScroll) {
+                currentElementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 완료 화면 표시
+        function showCompletionScreen() {
+            quizArea.classList.add('hidden');
+            completionArea.classList.remove('hidden');
+
+            const perfectMsg = document.getElementById('perfectMsg');
+            const reviewSection = document.getElementById('reviewSection');
+            const wrongListEl = document.getElementById('wrongList');
+
+            if (wrongIndices.size > 0) {
+                perfectMsg.classList.add('hidden');
+                reviewSection.classList.remove('hidden');
+                
+                wrongListEl.innerHTML = '';
+                wrongIndices.forEach(idx => {
+                    const p = currentPoints[idx];
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-white text-rose-800 border-2 border-rose-200 shadow-sm';
+                    tag.innerHTML = `⚠️ <span class="text-rose-400 mr-2 text-xs">${meridiansData[currentMeridianId].prefix}${idx+1}</span> ${p.name} <span class="text-rose-500 ml-1">(${p.hanja})</span>`; // 한자 크기 확대
+                    wrongListEl.appendChild(tag);
+                });
+            } else {
+                perfectMsg.classList.remove('hidden');
+                reviewSection.classList.add('hidden');
+            }
+        }
+
+        // 복습 모드 시작
+        document.getElementById('startReviewBtn').addEventListener('click', () => {
+            isReviewMode = true;
+            reviewQueue = Array.from(wrongIndices);
+            
+            // 랜덤 셔플
+            for (let i = reviewQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [reviewQueue[i], reviewQueue[j]] = [reviewQueue[j], reviewQueue[i]];
+            }
+            
+            currentReviewIndex = 0;
+            completionArea.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            nextQuestion();
+        });
+
+        // 피드백 에러 처리
+        function showFeedbackError(message = '틀렸습니다. 다시 생각해 보세요!') {
+            feedbackMsg.classList.remove('hidden', 'text-green-500');
+            feedbackMsg.classList.add('text-red-500');
+            feedbackMsg.textContent = message;
+            
+            inputEl.classList.remove('border-slate-300', 'focus:border-indigo-500');
+            inputEl.classList.add('border-red-500', 'focus:border-red-500', 'bg-red-50');
+            inputEl.classList.remove('shake');
+            void inputEl.offsetWidth; // trigger reflow
+            inputEl.classList.add('shake');
+            
+            setTimeout(() => {
+                inputEl.classList.remove('border-red-500', 'focus:border-red-500', 'bg-red-50');
+                inputEl.classList.add('border-slate-300', 'focus:border-indigo-500');
+            }, 800);
+        }
+
+        function hideFeedback() {
+            feedbackMsg.classList.add('hidden');
+            inputEl.classList.remove('border-red-500', 'focus:border-red-500', 'bg-red-50');
+            inputEl.classList.add('border-slate-300', 'focus:border-indigo-500');
+        }
+
+        // 정답 체크 로직 (한글 이름 또는 이명 검사)
+        function checkAnswer() {
+            const userInput = inputEl.value.trim().replace(/\s+/g, ''); 
+            if (!userInput) return;
+
+            const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
+            const correctAnswer = targetPoint.name;
+            const aliasList = aliases[correctAnswer];
+
+            // 한글 이름이 일치하거나, 이명 리스트에 포함되어 있으면 정답
+            if (userInput === correctAnswer || (aliasList && aliasList.includes(userInput))) {
+                if (isReviewMode) {
+                    reviewQueue.splice(currentReviewIndex, 1); // 맞추면 복습 큐에서 제거
+                    if (reviewQueue.length > 0) {
+                        currentReviewIndex = currentReviewIndex % reviewQueue.length;
+                        nextQuestion();
+                    } else {
+                        // 오답을 모두 마스터함
+                        isReviewMode = false;
+                        wrongIndices.clear();
+                        showCompletionScreen();
+                    }
+                } else {
+                    hasWrongAtCurrent = false;
+                    currentIndex++;
+                    nextQuestion();
+                }
+            } else {
+                if (isReviewMode) {
+                    handleReviewWrong("오답입니다. 다음 문제로 강제 이동합니다.");
+                } else {
+                    wrongIndices.add(currentIndex);
+                    hasWrongAtCurrent = true;
+                    showFeedbackError();
+                    updateUI(); // 스포일러 없는 ??(오답) 태그 렌더링
+                }
+            }
+        }
+
+        // 이벤트 리스너
+        selectEl.addEventListener('change', initGame);
+        resetBtn.addEventListener('click', initGame);
+        
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if(!inputEl.disabled) checkAnswer();
+            }
+        });
+        
+        inputEl.addEventListener('input', () => {
+            if (!feedbackMsg.classList.contains('hidden')) {
+                hideFeedback();
+            }
+        });
+
+        // 프로그램 시작
+        initGame();
+
+    </script>
+</body>
+</html>
