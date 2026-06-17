@@ -34,9 +34,12 @@
             <p class="text-slate-500">순서대로 혈자리를 맞추며 완벽하게 외워보세요. (한자 자동 표시)</p>
         </header>
 
+        <!-- 메인 레이아웃 (좌: 퀴즈 3칸 / 우: 전체 목록 2칸) -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
             
+            <!-- 왼쪽: 퀴즈 영역 (3칸 차지) -->
             <div class="lg:col-span-3 flex flex-col gap-6">
+                <!-- 컨트롤 패널 & 퀴즈 -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                         <div class="w-full sm:w-auto">
@@ -54,6 +57,7 @@
                         </button>
                     </div>
 
+                    <!-- 프로그래스 바 -->
                     <div class="mb-2 flex justify-between items-center text-sm font-medium text-indigo-700">
                         <span id="progressText">0 / 27</span>
                         <span id="progressPercent">0%</span>
@@ -62,6 +66,7 @@
                         <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
 
+                    <!-- 입력 영역 -->
                     <div id="quizArea" class="text-center py-6 border-t border-slate-100">
                         <h2 id="questionLabel" class="text-2xl font-bold text-slate-800 mb-4">
                             1번 혈자리 (KI1)
@@ -69,7 +74,7 @@
                         
                         <div class="max-w-md mx-auto">
                             <div class="relative">
-                                <input type="text" id="pointInput" autocomplete="off" placeholder="혈자리 이름 입력 (예: 용천)" 
+                                <input type="text" id="pointInput" autocomplete="off" placeholder="혈자리 이름 입력" 
                                     class="block w-full p-4 text-center text-xl text-slate-900 border-2 border-slate-300 rounded-xl bg-slate-50 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                             </div>
                             <div id="feedbackMsg" class="mt-3 text-sm font-medium h-5 text-red-500 hidden">
@@ -87,6 +92,7 @@
                             
                             <div id="hintText" class="mt-2 text-lg font-bold text-indigo-400 hidden"></div>
                             
+                            <!-- 정답 보기 영역 -->
                             <div id="answerArea" class="mt-4 p-4 bg-rose-50 border border-rose-200 rounded-lg hidden transition-all">
                                 <p class="text-sm text-rose-700 mb-3">정답: <span id="answerText" class="font-bold text-2xl text-rose-900 ml-1"></span></p>
                                 <div class="flex justify-center gap-2">
@@ -94,11 +100,12 @@
                                         모르겠음 (넘어가기)
                                     </button>
                                 </div>
-                                <p class="mt-2 text-xs text-rose-500">오답 노트를 위해 직접 입력하거나 그냥 넘어갈 수 있습니다.</p>
+                                <p class="mt-2 text-xs text-rose-500">정답을 확인한 후 입력하여 넘어가면 자동으로 오답 처리됩니다.</p>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 완료 & 오답 복습 화면 (숨김) -->
                     <div id="completionArea" class="text-center py-8 hidden">
                         <div id="perfectMsg" class="hidden">
                             <div class="text-5xl mb-4">🏆</div>
@@ -112,7 +119,8 @@
                             <p class="text-slate-600 mb-4">하지만 틀리거나 넘긴 혈자리가 있습니다. 아래 오답들을 확인하세요.</p>
                             
                             <div id="wrongList" class="flex flex-wrap justify-center gap-2 mb-8 p-4 bg-rose-50 rounded-lg border border-rose-100">
-                                </div>
+                                <!-- 오답 목록 인젝션 -->
+                            </div>
                             
                             <button id="startReviewBtn" class="px-8 py-3 text-lg font-bold text-white bg-rose-500 rounded-xl hover:bg-rose-600 shadow-md transform transition hover:-translate-y-1">
                                 다시 외우기 (오답 랜덤 복습)
@@ -121,16 +129,19 @@
                     </div>
                 </div>
 
+                <!-- 하단 맞춘 혈자리 목록 -->
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                     <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         현재까지 맞춘 유주 노선
                     </h3>
                     <div id="guessedList" class="flex flex-wrap gap-2">
-                        </div>
+                        <!-- Javascript로 태그가 주입됩니다. -->
+                    </div>
                 </div>
             </div>
 
+            <!-- 오른쪽: 전체 혈자리 참조 목록 (2칸 차지) -->
             <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col h-fit">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-xl">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center">
@@ -144,14 +155,17 @@
                 </div>
                 
                 <div class="relative p-2">
+                    <!-- 컨닝 방지 잠금 화면 -->
                     <div id="refLockScreen" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-b-xl min-h-[400px]">
                         <div class="text-5xl mb-4">🔒</div>
                         <p class="font-bold text-lg text-slate-700">컨닝 방지 모드</p>
                         <p class="text-sm text-slate-500 mt-2">우측 상단의 '목록 열기'를 눌러 확인하세요.</p>
                     </div>
                     
+                    <!-- 실제 목록 -->
                     <div id="referenceListContainer" class="flex flex-col gap-1 max-h-[600px] overflow-y-auto pr-1 hidden">
-                        </div>
+                        <!-- Javascript로 목록이 주입됩니다. -->
+                    </div>
                 </div>
             </div>
 
@@ -250,13 +264,15 @@
         let isHintVisible = false;
         let isAnswerVisible = false;
         let isReferenceVisible = false;
+        
+        let hasWrongAtCurrent = false; // 스포일러 방지용 (?? 표시)
+        let hasViewedAnswer = false; // 정답 확인 여부 추적용
 
         // 복습 모드 관련 변수
         let isReviewMode = false;
         let wrongIndices = new Set(); // 오답 기록
         let reviewQueue = []; // 복습할 문제 인덱스 배열 (랜덤)
         let currentReviewIndex = 0; 
-        let hasWrongAtCurrent = false; // 스포일러 방지용 (?? 표시)
 
         // DOM 요소
         const selectEl = document.getElementById('meridianSelect');
@@ -292,6 +308,7 @@
             isReviewMode = false;
             wrongIndices.clear();
             hasWrongAtCurrent = false;
+            hasViewedAnswer = false;
             
             quizArea.classList.remove('hidden');
             completionArea.classList.add('hidden');
@@ -323,7 +340,7 @@
 
         function showHint() {
             const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
-            hintText.innerHTML = getChosung(targetPoint.name); // 한자 제거
+            hintText.innerHTML = getChosung(targetPoint.name);
             hintText.classList.remove('hidden');
             hintBtn.textContent = '힌트 닫기';
             isHintVisible = true;
@@ -332,16 +349,17 @@
         function hideHint() {
             hintText.classList.add('hidden');
             hintText.textContent = '';
-            hintBtn.textContent = '힌트 보기 (초성)'; // 텍스트 수정
+            hintBtn.textContent = '힌트 보기 (초성)';
             isHintVisible = false;
         }
 
         function showAnswer() {
             const targetPoint = isReviewMode ? currentPoints[reviewQueue[currentReviewIndex]] : currentPoints[currentIndex];
-            answerText.innerHTML = `${targetPoint.name}<span class="font-normal text-rose-700 ml-1">(${targetPoint.hanja})</span>`; // 한자 크기 조정
+            answerText.innerHTML = `${targetPoint.name}<span class="font-normal text-rose-700 ml-1">(${targetPoint.hanja})</span>`;
             answerArea.classList.remove('hidden');
             showAnswerBtn.textContent = '정답 숨기기';
             isAnswerVisible = true;
+            hasViewedAnswer = true; // 정답을 본 상태로 기록
         }
 
         function hideAnswer() {
@@ -379,6 +397,7 @@
 
         function nextQuestion() {
             inputEl.value = '';
+            hasViewedAnswer = false; // 다음 문제로 넘어갈 때 정답 확인 여부 초기화
             hideFeedback();
             hideHint();
             hideAnswer();
@@ -425,10 +444,10 @@
                         const tag = document.createElement('span');
                         if (wrongIndices.has(i)) {
                             tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-800 border border-rose-200';
-                            tag.innerHTML = `⚠️ <span class="text-rose-400 ml-1 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`; // 한자 크기 확대
+                            tag.innerHTML = `⚠️ <span class="text-rose-400 ml-1 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`;
                         } else {
                             tag.className = 'point-tag inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 border border-indigo-200';
-                            tag.innerHTML = `<span class="text-indigo-400 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`; // 한자 크기 확대
+                            tag.innerHTML = `<span class="text-indigo-400 mr-1 text-xs">${i+1}</span> ${p.name}<span class="ml-0.5 opacity-80">(${p.hanja})</span>`;
                         }
                         guessedList.appendChild(tag);
                     }
@@ -446,11 +465,11 @@
                 const targetIdx = reviewQueue[currentReviewIndex];
                 
                 const prevHtml = targetIdx > 0 
-                    ? `<span class="block">${currentPoints[targetIdx - 1].name}(${currentPoints[targetIdx - 1].hanja})</span>`
+                    ? `<span class="block">${currentPoints[targetIdx - 1].name}</span><span class="text-sm font-normal">(${currentPoints[targetIdx - 1].hanja})</span>`
                     : '<span class="text-sm">시작</span>';
                     
                 const nextHtml = targetIdx < total - 1 
-                    ? `<span class="block">${currentPoints[targetIdx + 1].name}(${currentPoints[targetIdx + 1].hanja})</span>`
+                    ? `<span class="block">${currentPoints[targetIdx + 1].name}</span><span class="text-sm font-normal">(${currentPoints[targetIdx + 1].hanja})</span>`
                     : '<span class="text-sm">끝</span>';
 
                 questionLabel.innerHTML = `
@@ -531,7 +550,7 @@
                     const p = currentPoints[idx];
                     const tag = document.createElement('span');
                     tag.className = 'inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-white text-rose-800 border-2 border-rose-200 shadow-sm';
-                    tag.innerHTML = `⚠️ <span class="text-rose-400 mr-2 text-xs">${meridiansData[currentMeridianId].prefix}${idx+1}</span> ${p.name} <span class="text-rose-500 ml-1">(${p.hanja})</span>`; // 한자 크기 확대
+                    tag.innerHTML = `⚠️ <span class="text-rose-400 mr-2 text-xs">${meridiansData[currentMeridianId].prefix}${idx+1}</span> ${p.name} <span class="text-rose-500 ml-1">(${p.hanja})</span>`;
                     wrongListEl.appendChild(tag);
                 });
             } else {
@@ -593,17 +612,25 @@
             // 한글 이름이 일치하거나, 이명 리스트에 포함되어 있으면 정답
             if (userInput === correctAnswer || (aliasList && aliasList.includes(userInput))) {
                 if (isReviewMode) {
-                    reviewQueue.splice(currentReviewIndex, 1); // 맞추면 복습 큐에서 제거
-                    if (reviewQueue.length > 0) {
-                        currentReviewIndex = currentReviewIndex % reviewQueue.length;
-                        nextQuestion();
+                    if (hasViewedAnswer) {
+                        // 복습 모드인데 정답을 봤다면 맞춘 것으로 인정하지 않고 넘어감
+                        handleReviewWrong("정답을 확인하여 오답으로 처리됩니다.");
                     } else {
-                        // 오답을 모두 마스터함
-                        isReviewMode = false;
-                        wrongIndices.clear();
-                        showCompletionScreen();
+                        reviewQueue.splice(currentReviewIndex, 1); // 스스로 맞추면 복습 큐에서 제거
+                        if (reviewQueue.length > 0) {
+                            currentReviewIndex = currentReviewIndex % reviewQueue.length;
+                            nextQuestion();
+                        } else {
+                            // 오답을 모두 마스터함
+                            isReviewMode = false;
+                            wrongIndices.clear();
+                            showCompletionScreen();
+                        }
                     }
                 } else {
+                    if (hasViewedAnswer || hasWrongAtCurrent) {
+                        wrongIndices.add(currentIndex); // 정답을 보고 입력했거나, 한 번이라도 틀렸다면 오답 기록
+                    }
                     hasWrongAtCurrent = false;
                     currentIndex++;
                     nextQuestion();
